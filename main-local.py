@@ -113,9 +113,9 @@ class Chatbot():
     def create_prompt(self, df, user_input):
         result = self.search_embeddings(df, user_input, n=3)
         print(result)
-        prompt = """You are a large language model whose expertise is reading and summarizing scientific papers. 
-        You are given a query and a series of text embeddings from a paper in order of their cosine similarity to the query.
-        You must take the given embeddings and return a very detailed summary of the paper that answers the query.
+        prompt = """You are a large language model whose expertise is reading and summarizing scientific books. 
+        You are given a query and a series of text embeddings from a book in order of their cosine similarity to the query.
+        You must take the given embeddings and return an answer to the query, if there is one on the text, or make it clear that the answer is not in the text and based on your expertise.
             
             Given the question: """+ user_input + """
             
@@ -125,7 +125,7 @@ class Chatbot():
             2.""" + str(result.iloc[1]['text']) + """
             3.""" + str(result.iloc[2]['text']) + """
 
-            Return a detailed answer based on the paper:"""
+            Return a detailed answer based on the book:"""
 
         print('Done creating prompt')
         return prompt
