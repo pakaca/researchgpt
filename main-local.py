@@ -1,3 +1,5 @@
+import hashlib
+import pickle
 from flask import Flask, request, render_template
 from io import BytesIO
 from PyPDF2 import PdfReader
@@ -147,31 +149,77 @@ def index():
     return render_template("index.html")
 
 @app.route("/process_pdf", methods=['POST'])
+
 def process_pdf():
     print("Processing pdf")
-    file = request.data
-    pdf = PdfReader(BytesIO(file))
-    chatbot = Chatbot()
-    paper_text = chatbot.parse_paper(pdf)
+    if 'pdf' in request.files:
+        file = request.files['pdf'].read()
+    else:
+        return "Error: No file uploaded"
+
     global df
-    df = chatbot.paper_df(paper_text)
-    df = chatbot.calculate_embeddings(df)
+    df = process_pdf_with_cache(file)
     print("Done processing pdf")
     return {'key': ''}
 
+# def process_pdf():
+#     print("Processing pdf")
+#     file = request.data
+#     pdf = PdfReader(BytesIO(file))
+#     chatbot = Chatbot()
+#     paper_text = chatbot.parse_paper(pdf)
+#     global df
+#     df = chatbot.paper_df(paper_text)
+#     df = chatbot.calculate_embeddings(df)
+#     print("Done processing pdf")
+#     return {'key': ''}
+
 @app.route("/download_pdf", methods=['POST'])
 def download_pdf():
-    chatbot = Chatbot()
+    print("Downloading pdf")
     url = request.json['url']
     r = requests.get(str(url))
-    print(r.headers)
-    pdf = PdfReader(BytesIO(r.content))
-    paper_text = chatbot.parse_paper(pdf)
+    file = r.content
+
     global df
-    df = chatbot.paper_df(paper_text)
-    df = chatbot.calculate_embeddings(df)
+    df = process_pdf_with_cache(file)
     print("Done processing pdf")
     return {'key': ''}
+# def download_pdf():
+#     chatbot = Chatbot()
+#     url = request.json['url']
+#     r = requests.get(str(url))
+#     print(r.headers)
+#     pdf = PdfReader(BytesIO(r.content))
+#     paper_text = chatbot.parse_paper(pdf)
+#     global df
+#     df = chatbot.paper_df(paper_text)
+#     df = chatbot.calculate_embeddings(df)
+#     print("Done processing pdf")
+#     return {'key': ''}
+def process_pdf_with_cache(file):
+    pdf_hash = hashlib.sha256(file).hexdigest()
+    cache_file = f'cache/{pdf_hash}.pkl'
+
+    if os.path.exists(cache_file):
+        print("Loading cached data")
+        with open(cache_file, 'rb') as f:
+            df = pickle.load(f)
+        return df
+
+    chatbot = Chatbot()
+    pdf = PdfReader(BytesIO(file))
+    paper_text = chatbot.parse_paper(pdf)
+    df = chatbot.paper_df(paper_text)
+    df = chatbot.calculate_embeddings(df)
+
+    print("Saving processed data")
+    with open(cache_file, 'wb') as f:
+        pickle.dump(df, f)
+
+    return df
+
+
 
 @app.route("/reply", methods=['POST'])
 def reply():
