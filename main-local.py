@@ -195,7 +195,7 @@ def download_pdf():
 #     return {'key': ''}
 def process_pdf_with_cache(file):
     pdf_hash = hashlib.sha256(file).hexdigest()
-    cache_file = f'cache/{pdf_hash}.pkl'
+    cache_file = f'/cache/{pdf_hash}.pkl'
 
     if os.path.exists(cache_file):
         print("Loading cached data")
