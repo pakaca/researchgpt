@@ -5,7 +5,6 @@ openai
 requests
 flask-cors
 matplotlib
-pickle
 scipy
 plotly
 google-cloud-storage
