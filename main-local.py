@@ -152,11 +152,7 @@ def index():
 
 def process_pdf():
     print("Processing pdf")
-    if 'pdf' in request.files:
-        file = request.files['pdf'].read()
-    else:
-        return "Error: No file uploaded"
-
+    file = request.data
     global df
     df = process_pdf_with_cache(file)
     print("Done processing pdf")
