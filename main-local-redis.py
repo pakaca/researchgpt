@@ -12,7 +12,7 @@ from _md5 import md5
 
 app = Flask(__name__)
 # db=redis.from_url(os.environ['REDISCLOUD_URL'])
-db = redis.StrictRedis(host='192.168.1.103', port=6379, db=0)
+db = redis.StrictRedis(host='192.168.1.103', port=6379, password="repapaluto", db=0)
 
 CORS(app)
 
